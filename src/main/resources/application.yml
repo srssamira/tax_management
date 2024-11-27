@@ -1,0 +1,7 @@
+spring:
+  application:
+    name: taxes_management
+  h2:
+    console:
+      enabled: true
+      path: /h2
