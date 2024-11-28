@@ -3,6 +3,8 @@ package com.zup.br.taxes_management.services;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import com.zup.br.taxes_management.models.TaxType;
+import com.zup.br.taxes_management.repositories.TaxTypeRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -14,10 +16,10 @@ import java.util.List;
 import java.util.Optional;
 
 @SpringBootTest
-public class TaxTypeServiceTest {
+public class TaxTypeServiceImplTest {
 
     @Autowired
-    private TaxTypeService taxTypeService;
+    private TaxTypeServiceImpl taxTypeServiceImpl;
 
     @MockitoBean
     private TaxTypeRepository taxTypeRepository;
@@ -35,15 +37,15 @@ public class TaxTypeServiceTest {
 
     @Test
     public void testWhenRegisterTaxTypeHasNoImpediment() {
-        TaxType taxTypeRegistered = taxTypeService.register(taxType);
+        TaxType taxTypeRegistered = taxTypeServiceImpl.registerTaxType(taxType);
 
-        Mockito.verify(taxTypeService, Mockito.times(1)).save(taxType);
+        Mockito.verify(taxTypeRepository, Mockito.times(1)).save(taxType);
     }
 
     // teste p retornar excecao na validacao eu faco no controller
 
     @Test
-    public void testWhenDisplayListAlTaxTypes() {
+    public void testWhenDisplayListAllTaxTypes() {
         TaxType taxType2 = new TaxType();
         taxType2.setId(2L);
         taxType2.setName("ISS");
@@ -54,9 +56,11 @@ public class TaxTypeServiceTest {
 
         List<TaxType> taxTypeList = taxTypeRepository.findAll();
 
-        assertEquals(2, taxTypeList);
+        assertEquals(2, taxTypeList.size());
         assertEquals("ISS", taxType2.getName());
         assertEquals("ICMS", taxType.getName());
+
+        Mockito.verify(taxTypeRepository, Mockito.times(1)).findAll();
     }
 
     @Test
@@ -66,17 +70,18 @@ public class TaxTypeServiceTest {
 
         TaxType taxTypeTest = taxTypeRepository.findById(taxType.getId()).get();
 
-        Mockito.verify(taxTypeRepository, Mockito.times(2)).findById();
+        Mockito.verify(taxTypeRepository, Mockito.times(1)).findById(taxType.getId());
+        assertEquals("ICMS", taxType.getName());
     }
 
     @Test
     public void testWhenDisplayTaxTypeByIdDoesNotExist() {
-        Mockito.when(taxTypeRepository.findBy(taxType.getId())).thenReturn(Optional.empty());
+        Mockito.when(taxTypeRepository.findById(taxType.getId())).thenReturn(Optional.empty());
 
-        RuntimeException expectedException = assertThrows(RuntimeException.class, () -> taxTypeService.displayById(taxType.getId()));
+        RuntimeException expectedException = assertThrows(RuntimeException.class, () -> taxTypeServiceImpl.displayTaxTypeById(taxType.getId()));
 
         assertEquals("Tax type not found", expectedException.getMessage());
-        Mockito.verify(taxTypeRepository, Mockito.times(1)).findById();
+        Mockito.verify(taxTypeRepository, Mockito.times(1)).findById(taxType.getId());
     }
 
     // teste do delete fazer no controller (pq retorna status http)
