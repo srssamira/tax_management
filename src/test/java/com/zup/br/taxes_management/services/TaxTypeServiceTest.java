@@ -16,10 +16,10 @@ import java.util.List;
 import java.util.Optional;
 
 @SpringBootTest
-public class TaxTypeServiceImplTest {
+public class TaxTypeServiceTest {
 
     @Autowired
-    private TaxTypeServiceImpl taxTypeServiceImpl;
+    private TaxTypeService taxtypeService;
 
     @MockitoBean
     private TaxTypeRepository taxTypeRepository;
@@ -37,7 +37,7 @@ public class TaxTypeServiceImplTest {
 
     @Test
     public void testWhenRegisterTaxTypeHasNoImpediment() {
-        TaxType taxTypeRegistered = taxTypeServiceImpl.registerTaxType(taxType);
+        TaxType taxTypeRegistered = taxtypeService.registerTaxType(taxType);
 
         Mockito.verify(taxTypeRepository, Mockito.times(1)).save(taxType);
     }
@@ -78,7 +78,7 @@ public class TaxTypeServiceImplTest {
     public void testWhenDisplayTaxTypeByIdDoesNotExist() {
         Mockito.when(taxTypeRepository.findById(taxType.getId())).thenReturn(Optional.empty());
 
-        RuntimeException expectedException = assertThrows(RuntimeException.class, () -> taxTypeServiceImpl.displayTaxTypeById(taxType.getId()));
+        RuntimeException expectedException = assertThrows(RuntimeException.class, () -> taxtypeService.displayTaxTypeById(taxType.getId()));
 
         assertEquals("Tax type not found", expectedException.getMessage());
         Mockito.verify(taxTypeRepository, Mockito.times(1)).findById(taxType.getId());
