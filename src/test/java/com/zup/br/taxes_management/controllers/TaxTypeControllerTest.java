@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zup.br.taxes_management.controllers.dtos.TaxTypeRegisterDTO;
 import com.zup.br.taxes_management.infra.TaxTypeNotFoundException;
 import com.zup.br.taxes_management.models.TaxType;
-import com.zup.br.taxes_management.services.TaxTypeService;
+import com.zup.br.taxes_management.services.tax_type.TaxTypeService;
 import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

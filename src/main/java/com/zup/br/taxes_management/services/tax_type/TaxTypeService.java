@@ -1,4 +1,4 @@
-package com.zup.br.taxes_management.services;
+package com.zup.br.taxes_management.services.tax_type;
 
 import com.zup.br.taxes_management.models.TaxType;
 

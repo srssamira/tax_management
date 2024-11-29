@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.zup.br.taxes_management.models.TaxType;
 import com.zup.br.taxes_management.repositories.TaxTypeRepository;
+import com.zup.br.taxes_management.services.tax_type.TaxTypeService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
