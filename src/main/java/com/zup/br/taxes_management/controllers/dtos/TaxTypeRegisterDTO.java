@@ -7,14 +7,14 @@ import lombok.Data;
 @Data
 public class TaxTypeRegisterDTO {
 
-    @NotNull
-    @NotBlank
+    @NotNull(message = "name can't be null")
+    @NotBlank(message = "name can't be blank")
     String name;
 
-    @NotNull
-    @NotBlank
+    @NotNull(message = "description can't be null")
+    @NotBlank(message = "description can't be blank")
     String description;
 
-    @NotNull
+    @NotNull(message = "aliquot can't be null")
     Double aliquot;
 }

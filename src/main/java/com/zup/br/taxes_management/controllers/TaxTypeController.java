@@ -5,6 +5,7 @@ import com.zup.br.taxes_management.controllers.dtos.TaxTypeRegisterDTO;
 import com.zup.br.taxes_management.infra.TaxTypeNotFoundException;
 import com.zup.br.taxes_management.models.TaxType;
 import com.zup.br.taxes_management.services.TaxTypeService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -32,6 +33,13 @@ public class TaxTypeController {
         catch (TaxTypeNotFoundException taxTypeNotFoundException) {
             return ResponseEntity.status(404).body(Map.of("description", taxTypeNotFoundException.getMessage()));
         }
+    }
+
+    @PostMapping
+    public ResponseEntity<?> createTaxType(@RequestBody @Valid TaxTypeRegisterDTO taxTypeRegisterDTO) {
+            ObjectMapper objectMapper = new ObjectMapper();
+            TaxType taxType = taxTypeService.registerTaxType(objectMapper.convertValue(taxTypeRegisterDTO, TaxType.class));
+            return ResponseEntity.status(201).body(taxType);
     }
 
 

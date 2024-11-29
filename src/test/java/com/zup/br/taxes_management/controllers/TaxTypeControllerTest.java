@@ -51,7 +51,9 @@ public class TaxTypeControllerTest {
 
         String json = mapper.writeValueAsString(taxTypeRegisterDTO);
 
-        Mockito.when(taxTypeService.registerTaxType(Mockito.any(TaxType.class))).thenReturn(taxType);
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        Mockito.when(taxTypeService.registerTaxType(Mockito.any(TaxType.class))).thenReturn(objectMapper.convertValue(taxTypeRegisterDTO, TaxType.class));
 
         mockMvc.perform(
                         MockMvcRequestBuilders
@@ -67,7 +69,7 @@ public class TaxTypeControllerTest {
     @Test
     public void testWhenRegisterTaxTypeHasInvalidData() throws Exception {
         TaxTypeRegisterDTO taxTypeRegisterDTO = new TaxTypeRegisterDTO();
-        taxTypeRegisterDTO.setName("");
+        taxTypeRegisterDTO.setName(" ");
         taxTypeRegisterDTO.setDescription("Service tax");
         taxTypeRegisterDTO.setAliquot(12.0);
 
@@ -79,7 +81,7 @@ public class TaxTypeControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.errors.name").exists());
+                .andExpect(MockMvcResultMatchers.jsonPath("$[?(@.field == 'name')].description").value("name can't be blank"));
 
         taxTypeRegisterDTO.setName("IPI");
         taxTypeRegisterDTO.setDescription("");
@@ -93,7 +95,8 @@ public class TaxTypeControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.errors.description").exists());
+                .andExpect(MockMvcResultMatchers.jsonPath("$[?(@.field == 'description')].description").value("description can't be blank"));
+                                                            // procurando no meu map a chave description e verificando se ela retorna a mensagem de erro esperada
 
         taxTypeRegisterDTO.setName("IPI");
         taxTypeRegisterDTO.setDescription("Service tax");
@@ -107,7 +110,7 @@ public class TaxTypeControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.errors.aliquot").exists());
+                .andExpect(MockMvcResultMatchers.jsonPath("$[?(@.field == 'aliquot')].description").value("aliquot can't be null"));
     }
 
     @Test
