@@ -1,5 +1,6 @@
 package com.zup.br.taxes_management.services;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zup.br.taxes_management.controllers.dtos.TaxCalculationProcessDTO;
 import com.zup.br.taxes_management.infra.IllegalBaseValueException;
 import com.zup.br.taxes_management.infra.TaxTypeNotFoundException;
@@ -34,6 +35,7 @@ public class TaxCalculationProcessServiceTest {
 
     @BeforeEach
     public void setUp() {
+
         this.taxCalculationProcessDTO = new TaxCalculationProcessDTO();
         taxCalculationProcessDTO.setBaseValue(1000.0);
 
