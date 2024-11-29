@@ -46,7 +46,7 @@ public class TaxTypeController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteTaxTypeById(@PathVariable Long id) {
         try {
-            taxTypeService.deleteTaxType(id);
+            taxTypeService.deleteTaxTypeById(id);
             return ResponseEntity.status(204).body(Map.of("description", "Tax type deleted successfully"));
         } catch (TaxTypeNotFoundException taxTypeNotFoundException) {
             return ResponseEntity.status(404).body(Map.of("description", taxTypeNotFoundException.getMessage()));
