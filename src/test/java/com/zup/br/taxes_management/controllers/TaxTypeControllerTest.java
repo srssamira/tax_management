@@ -190,15 +190,19 @@ public class TaxTypeControllerTest {
                 MockMvcRequestBuilders
                         .delete("/api/taxes/types/{id}", taxType.getId()))
                 .andExpect(MockMvcResultMatchers.status().isNoContent())
-                .andExpect(MockMvcResultMatchers.content().string("Tax type deleted successfully"));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.description", CoreMatchers.is("Tax type deleted successfully")));
     }
 
     @Test
     public void testWhenDeleteTaxTypeReturnsNotFound() throws Exception {
+
+        Mockito.when(taxTypeService.deleteTaxTypeById(taxType.getId()))
+                .thenThrow(new TaxTypeNotFoundException("Tax type not found"));
+
         mockMvc.perform(
                 MockMvcRequestBuilders
                         .delete("/api/taxes/types/{id}", taxType.getId()))
                 .andExpect(MockMvcResultMatchers.status().isNotFound())
-                .andExpect(MockMvcResultMatchers.content().string("Tax type not found"));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.description", CoreMatchers.is("Tax type not found")));
     }
 }

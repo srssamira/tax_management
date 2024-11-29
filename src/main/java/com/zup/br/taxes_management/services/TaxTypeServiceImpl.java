@@ -33,8 +33,12 @@ public class TaxTypeServiceImpl implements TaxTypeService {
         return taxTypeRepository.findById(idTaxType).get();
     }
 
-    @Override
-    public void deleteTaxType (Long idTaxType) {
+    public boolean deleteTaxTypeById(Long idTaxType) throws TaxTypeNotFoundException {
+        if (!taxTypeRepository.existsById(idTaxType)) {
+            throw new TaxTypeNotFoundException("Tax type not found");
+        }
 
+        taxTypeRepository.deleteById(idTaxType);
+        return true;
     }
 }

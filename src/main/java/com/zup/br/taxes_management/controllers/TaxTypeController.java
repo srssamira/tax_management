@@ -19,6 +19,9 @@ public class TaxTypeController {
     @Autowired
     private TaxTypeService taxTypeService;
 
+    ObjectMapper objectMapper = new ObjectMapper();
+
+
     @GetMapping
     public ResponseEntity<?> getAllTaxTypes() {
         return ResponseEntity.status(200).body(taxTypeService.displayAllTaxTypes());
@@ -29,18 +32,25 @@ public class TaxTypeController {
         try {
             TaxType taxType = taxTypeService.displayTaxTypeById(id);
             return ResponseEntity.status(200).body(taxType);
-        }
-        catch (TaxTypeNotFoundException taxTypeNotFoundException) {
+        } catch (TaxTypeNotFoundException taxTypeNotFoundException) {
             return ResponseEntity.status(404).body(Map.of("description", taxTypeNotFoundException.getMessage()));
         }
     }
 
     @PostMapping
     public ResponseEntity<?> createTaxType(@RequestBody @Valid TaxTypeRegisterDTO taxTypeRegisterDTO) {
-            ObjectMapper objectMapper = new ObjectMapper();
-            TaxType taxType = taxTypeService.registerTaxType(objectMapper.convertValue(taxTypeRegisterDTO, TaxType.class));
-            return ResponseEntity.status(201).body(taxType);
+        TaxType taxType = taxTypeService.registerTaxType(objectMapper.convertValue(taxTypeRegisterDTO, TaxType.class));
+        return ResponseEntity.status(201).body(taxType);
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteTaxTypeById(@PathVariable Long id) {
+        try {
+            taxTypeService.deleteTaxType(id);
+            return ResponseEntity.status(204).body(Map.of("description", "Tax type deleted successfully"));
+        } catch (TaxTypeNotFoundException taxTypeNotFoundException) {
+            return ResponseEntity.status(404).body(Map.of("description", taxTypeNotFoundException.getMessage()));
+        }
+    }
 
 }

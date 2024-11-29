@@ -10,7 +10,7 @@ public interface TaxTypeService {
 
     TaxType displayTaxTypeById(Long idTaxType);
 
-    void deleteTaxType(Long idTaxType);
+    boolean deleteTaxTypeById (Long idTaxType);
 
     TaxType registerTaxType(TaxType taxType);
 }
