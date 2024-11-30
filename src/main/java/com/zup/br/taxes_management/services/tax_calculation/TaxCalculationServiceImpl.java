@@ -7,6 +7,8 @@ import com.zup.br.taxes_management.repositories.TaxTypeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 public class TaxCalculationServiceImpl implements TaxCalculationService {
 
@@ -14,14 +16,15 @@ public class TaxCalculationServiceImpl implements TaxCalculationService {
     TaxTypeRepository taxTypeRepository;
 
 
+    @Override
     public TaxCalculationResponseDTO calculateTaxValue(Long id, Double baseValue) {
-        if (taxTypeRepository.findById(id).isEmpty())
-            throw new TaxTypeNotFoundException("Tax type not found");
-
-        TaxType taxType = taxTypeRepository.findById(id).get();
-
+        TaxType taxType = findTaxType(id);
         Double taxValue = baseValue * taxType.getAliquot() / 100;
-
         return new TaxCalculationResponseDTO(taxType.getName(), baseValue, taxType.getAliquot(), taxValue);
+    }
+
+    public TaxType findTaxType(Long id) {
+        return taxTypeRepository.findById(id)
+                .orElseThrow(() -> new TaxTypeNotFoundException("Tax type not found"));
     }
 }

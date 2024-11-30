@@ -19,7 +19,7 @@ public class TaxTypeController {
     @Autowired
     private TaxTypeService taxTypeService;
 
-    ObjectMapper objectMapper = new ObjectMapper();
+    ObjectMapper mapper = new ObjectMapper();
 
 
     @GetMapping
@@ -39,7 +39,7 @@ public class TaxTypeController {
 
     @PostMapping
     public ResponseEntity<?> createTaxType(@RequestBody @Valid TaxTypeRegisterDTO taxTypeRegisterDTO) {
-        TaxType taxType = taxTypeService.registerTaxType(objectMapper.convertValue(taxTypeRegisterDTO, TaxType.class));
+        TaxType taxType = taxTypeService.registerTaxType(mapper.convertValue(taxTypeRegisterDTO, TaxType.class));
         return ResponseEntity.status(201).body(taxType);
     }
 

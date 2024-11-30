@@ -19,7 +19,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.util.List;
 
-@WebMvcTest
+@WebMvcTest(TaxTypeController.class)
 public class TaxTypeControllerTest {
 
     @Autowired

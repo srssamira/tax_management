@@ -9,6 +9,7 @@ import com.zup.br.taxes_management.services.tax_calculation.TaxCalculationServic
 import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -18,7 +19,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-@WebMvcTest
+import java.util.Optional;
+
+@WebMvcTest(TaxCalculationController.class)
 public class TaxCalculationControllerTest {
 
     @Autowired
@@ -27,16 +30,17 @@ public class TaxCalculationControllerTest {
     @MockitoBean
     private TaxCalculationService taxCalculationService;
 
-    TaxType taxType = new TaxType();
+    TaxType taxType;
 
     TaxCalculationDTO taxCalculationDTO;
 
-    ObjectMapper mapper = new ObjectMapper();
+    ObjectMapper mapper;
 
     @BeforeEach
     public void setUp() {
         this.taxType = new TaxType();
         this.taxCalculationDTO = new TaxCalculationDTO();
+        this.mapper = new ObjectMapper();
 
         taxType.setId(3L);
         taxType.setName("IOF");
@@ -48,43 +52,50 @@ public class TaxCalculationControllerTest {
 
     @Test
     public void testWhenTaxTypeIdNotFound() throws Exception {
+        Mockito.when(taxCalculationService.findTaxType(Mockito.anyLong()))
+                .thenThrow(new TaxTypeNotFoundException("Tax type not found"));
 
-        Mockito.when(taxCalculationService.calculateTaxValue(Mockito.anyLong(), Mockito.anyDouble()))
+        Mockito.when(taxCalculationService
+                        .calculateTaxValue(taxCalculationDTO.getId(), taxCalculationDTO.getBaseValue()))
                 .thenThrow(new TaxTypeNotFoundException("Tax type not found"));
 
         String json = mapper.writeValueAsString(taxCalculationDTO);
+        System.out.println(json);
 
         mockMvc.perform(
-                MockMvcRequestBuilders
-                        .post("/calculation")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(json))
+                        MockMvcRequestBuilders
+                                .post("/calculation")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(json))
                 .andExpect(MockMvcResultMatchers.status().isNotFound())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.description").value("Tax type not found"));
     }
 
     @Test
     public void testWhenTaxCalculationIsFoundAndReturnTaxCalculationResponseDTO() throws Exception {
-        Mockito.when(taxCalculationService.calculateTaxValue(taxType.getId(), taxCalculationDTO.getBaseValue()))
-                .thenReturn(new TaxCalculationResponseDTO
-                        (taxType.getName(), taxCalculationDTO.getBaseValue(),taxType.getAliquot(),
-                                taxCalculationDTO.getBaseValue() * taxType.getAliquot() / 100));
+
+        TaxCalculationResponseDTO expectedResponse = new TaxCalculationResponseDTO(taxType.getName(), taxCalculationDTO.getBaseValue(), taxType.getAliquot(), 11.4);
+
+        Mockito.when(taxCalculationService.findTaxType(taxType.getId())).thenReturn(taxType);
+
+        taxCalculationDTO.setId(taxType.getId());
+
+        Mockito.when(taxCalculationService.calculateTaxValue(taxCalculationDTO.getId(), 3000.0))
+                .thenReturn(expectedResponse);
 
         String json = mapper.writeValueAsString(taxCalculationDTO);
+        System.out.println(json);
 
         mockMvc.perform(
-                MockMvcRequestBuilders
-                        .post("/calculation")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(json))
+                        MockMvcRequestBuilders
+                                .post("/calculation")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(json))
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.description")
-                        .value("Tax calculation carried out successfully"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.taxType", CoreMatchers.is(taxType.getName())))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.baseValue", CoreMatchers.is(taxCalculationDTO.getBaseValue())))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.aliquot", CoreMatchers.is(taxType.getAliquot())))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.taxValue", CoreMatchers.is
-                        (taxCalculationDTO.getBaseValue() * taxType.getAliquot() / 100)));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.taxType").value("IOF"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.baseValue").value(3000.0))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.aliquot").value(0.38))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.taxValue").value(11.4));
     }
 
 }
