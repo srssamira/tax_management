@@ -1,16 +1,13 @@
 package com.zup.br.taxes_management.services;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.zup.br.taxes_management.controllers.dtos.TaxCalculationProcessDTO;
-import com.zup.br.taxes_management.infra.IllegalBaseValueException;
-import com.zup.br.taxes_management.infra.TaxTypeNotFoundException;
-import com.zup.br.taxes_management.models.TaxType;
-import com.zup.br.taxes_management.repositories.TaxTypeRepository;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.zup.br.taxes_management.services.tax_calculation.TaxCalculationProcessService;
+import com.zup.br.taxes_management.infra.TaxTypeNotFoundException;
+import com.zup.br.taxes_management.models.TaxType;
+import com.zup.br.taxes_management.repositories.TaxTypeRepository;
+import org.aspectj.lang.annotation.Before;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -24,71 +21,52 @@ import java.util.Optional;
 public class TaxCalculationProcessServiceTest {
 
     @Autowired
-    private TaxCalculationProcessService taxCalculationProcessService;
+    private TaxCalculationService taxCalculationService;
 
     @MockitoBean
     private TaxTypeRepository taxTypeRepository;
 
-    TaxCalculationProcessDTO taxCalculationProcessDTO;
+    private TaxCalculation taxCalculation;
 
-    TaxType taxType;
+    private TaxType taxType;
 
     @BeforeEach
     public void setUp() {
-
-        this.taxCalculationProcessDTO = new TaxCalculationProcessDTO();
-        taxCalculationProcessDTO.setBaseValue(1000.0);
-
+        this.taxCalculation = new TaxCalculation();
         this.taxType = new TaxType();
-        taxType.setId(1L);
-        taxType.setName("ICMS");
-        taxType.setDescription("Tax on circulation of goods and services");
-        taxType.setAliquot(18.0);
+
+        taxCalculation.setBaseValue(1230.0);
+
+        taxType.setId(2L);
+        taxType.setName("INSS");
+        taxType.setDescription("Social security manager");
+        taxType.setAliquot(7.5);
+
     }
 
     @Test
-    public void testWhenTaxCalculationProcessHasFoundTaxTypeId() {
-        Mockito.when(taxTypeRepository.findById(taxType.getId())).thenReturn(Optional.of(taxType));
-
-        Long id = taxTypeRepository.findById(taxType.getId()).get().getId();
-
-        Double taxValue = taxCalculationProcessService.calculateTaxValue(id, taxCalculationProcessDTO.getBaseValue());
-
-        assertEquals(180.0, taxValue);
-    }
-
-    @Test
-    public void testWhenTaxCalculationProcessHasNotFoundTaxTypeId() {
+    public void testWhenTaxTypeNotFoundById() {
         Mockito.when(taxTypeRepository.findById(taxType.getId())).thenReturn(Optional.empty());
 
-        TaxTypeNotFoundException taxTypeNotFoundException = assertThrows(TaxTypeNotFoundException.class, () -> taxCalculationProcessService.calculateTaxValue(taxType.getId(), Mockito.anyDouble()));
+        TaxTypeNotFoundException taxTypeNotFoundException = assertThrows(TaxTypeNotFoundException.class,
+                () -> taxCalculationService.calculateTaxValue(Mockito.anyLong(), Mockito.anyDouble()));
+
         assertEquals("Tax type not found", taxTypeNotFoundException.getMessage());
-
         Mockito.verify(taxTypeRepository, Mockito.times(1)).findById(taxType.getId());
     }
 
     @Test
-    public void testWhenBaseValueIsEqualZero() {
+    public void testWhenTaxTypeHasFound() {
         Mockito.when(taxTypeRepository.findById(taxType.getId())).thenReturn(Optional.of(taxType));
 
-        IllegalBaseValueException illegalBaseValueException =
-                assertThrows(IllegalBaseValueException.class, ()
-                        -> taxCalculationProcessService.calculateTaxValue(taxType.getId(), 0.0));
+        TaxCalculationResponseDTO taxCalculationResponseDTO =
+                taxCalculationService.calculateTaxValue(taxType.getId(), taxCalculation.getBaseValue());
 
-        assertEquals("Base value must be greater than zero", illegalBaseValueException.getMessage());
+        assertEquals("INSS", taxCalculationResponseDTO.getTaxType());
+        assertEquals(1230.0, taxCalculationResponseDTO.getBaseValue());
+        assertEquals(7.5, taxCalculationResponseDTO.getAliquot());
+        assertEquals(92.25, taxCalculationResponseDTO.getTaxValue());
 
-        Mockito.verify(taxTypeRepository, Mockito.times(1)).findById(taxType.getId());
     }
 
-    @Test
-    public void testWhenBaseValueIsLessThanZero() {
-        Mockito.when(taxTypeRepository.findById(taxType.getId())).thenReturn(Optional.of(taxType));
-
-        IllegalBaseValueException illegalBaseValueException =
-                assertThrows(IllegalBaseValueException.class, ()
-                        -> taxCalculationProcessService.calculateTaxValue(taxType.getId(), -Mockito.anyDouble()));
-
-        assertEquals("Base value must be greater than zero", illegalBaseValueException.getMessage());
-        Mockito.verify(taxTypeRepository, Mockito.times(1)).findById(taxType.getId());
-    }
 }

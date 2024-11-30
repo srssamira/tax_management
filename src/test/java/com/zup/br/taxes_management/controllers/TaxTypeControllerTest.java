@@ -57,7 +57,7 @@ public class TaxTypeControllerTest {
 
         mockMvc.perform(
                         MockMvcRequestBuilders
-                                .post("/api/taxes/types")
+                                .post("/types")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(json))
                 .andExpect(MockMvcResultMatchers.status().isCreated())
@@ -77,7 +77,7 @@ public class TaxTypeControllerTest {
 
         mockMvc.perform(
                 MockMvcRequestBuilders
-                        .post("/api/taxes/types")
+                        .post("/types")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest())
@@ -91,7 +91,7 @@ public class TaxTypeControllerTest {
 
         mockMvc.perform(
                 MockMvcRequestBuilders
-                        .post("/api/taxes/types")
+                        .post("/types")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest())
@@ -106,7 +106,7 @@ public class TaxTypeControllerTest {
 
         mockMvc.perform(
                 MockMvcRequestBuilders
-                        .post("/api/taxes/types")
+                        .post("/types")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest())
@@ -129,7 +129,7 @@ public class TaxTypeControllerTest {
 
         mockMvc.perform(
                         MockMvcRequestBuilders
-                                .get("/api/taxes/types")
+                                .get("/types")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(json))
 
@@ -155,7 +155,7 @@ public class TaxTypeControllerTest {
 
         mockMvc.perform(
                         MockMvcRequestBuilders
-                                .get("/api/taxes/types/{id}", taxType.getId())
+                                .get("/types/{id}", taxType.getId())
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(json))
                 .andExpect(MockMvcResultMatchers.status().isOk())
@@ -176,7 +176,7 @@ public class TaxTypeControllerTest {
 
         mockMvc.perform(
                         MockMvcRequestBuilders
-                                .get("/api/taxes/types/{id}", taxType.getId())
+                                .get("/types/{id}", taxType.getId())
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(json))
                 .andExpect(MockMvcResultMatchers.status().isNotFound())
@@ -188,7 +188,7 @@ public class TaxTypeControllerTest {
     public void testWhenDeleteTaxTypeReturnsNoContent() throws Exception {
         mockMvc.perform(
                 MockMvcRequestBuilders
-                        .delete("/api/taxes/types/{id}", taxType.getId()))
+                        .delete("/types/{id}", taxType.getId()))
                 .andExpect(MockMvcResultMatchers.status().isNoContent())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.description", CoreMatchers.is("Tax type deleted successfully")));
     }
@@ -201,7 +201,7 @@ public class TaxTypeControllerTest {
 
         mockMvc.perform(
                 MockMvcRequestBuilders
-                        .delete("/api/taxes/types/{id}", taxType.getId()))
+                        .delete("/types/{id}", taxType.getId()))
                 .andExpect(MockMvcResultMatchers.status().isNotFound())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.description", CoreMatchers.is("Tax type not found")));
     }
