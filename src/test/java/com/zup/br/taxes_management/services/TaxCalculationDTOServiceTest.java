@@ -4,10 +4,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import com.zup.br.taxes_management.controllers.dtos.TaxCalculationDTO;
+import com.zup.br.taxes_management.controllers.dtos.TaxCalculationResponseDTO;
 import com.zup.br.taxes_management.infra.TaxTypeNotFoundException;
 import com.zup.br.taxes_management.models.TaxType;
 import com.zup.br.taxes_management.repositories.TaxTypeRepository;
-import org.aspectj.lang.annotation.Before;
+import com.zup.br.taxes_management.services.tax_calculation.TaxCalculationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -18,7 +20,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import java.util.Optional;
 
 @SpringBootTest
-public class TaxCalculationProcessServiceTest {
+public class TaxCalculationDTOServiceTest {
 
     @Autowired
     private TaxCalculationService taxCalculationService;
@@ -26,13 +28,13 @@ public class TaxCalculationProcessServiceTest {
     @MockitoBean
     private TaxTypeRepository taxTypeRepository;
 
-    private TaxCalculation taxCalculation;
+    private TaxCalculationDTO taxCalculation;
 
     private TaxType taxType;
 
     @BeforeEach
     public void setUp() {
-        this.taxCalculation = new TaxCalculation();
+        this.taxCalculation = new TaxCalculationDTO();
         this.taxType = new TaxType();
 
         taxCalculation.setBaseValue(1230.0);
@@ -49,7 +51,7 @@ public class TaxCalculationProcessServiceTest {
         Mockito.when(taxTypeRepository.findById(taxType.getId())).thenReturn(Optional.empty());
 
         TaxTypeNotFoundException taxTypeNotFoundException = assertThrows(TaxTypeNotFoundException.class,
-                () -> taxCalculationService.calculateTaxValue(Mockito.anyLong(), Mockito.anyDouble()));
+                () -> taxCalculationService.calculateTaxValue(taxType.getId(), taxCalculation.getBaseValue()));
 
         assertEquals("Tax type not found", taxTypeNotFoundException.getMessage());
         Mockito.verify(taxTypeRepository, Mockito.times(1)).findById(taxType.getId());
