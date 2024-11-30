@@ -20,7 +20,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import java.util.Optional;
 
 @SpringBootTest
-public class TaxCalculationDTOServiceTest {
+public class TaxCalculationServiceTest {
 
     @Autowired
     private TaxCalculationService taxCalculationService;
