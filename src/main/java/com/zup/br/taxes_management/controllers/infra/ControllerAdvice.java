@@ -1,4 +1,4 @@
-package com.zup.br.taxes_management.infra;
+package com.zup.br.taxes_management.controllers.infra;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,3 +30,4 @@ public class ControllerAdvice {
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST).getBody();
     }
 }
+

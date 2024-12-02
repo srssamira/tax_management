@@ -1,19 +1,18 @@
 package com.zup.br.taxes_management.services.tax_calculation;
 
 import com.zup.br.taxes_management.controllers.dtos.TaxCalculationResponseDTO;
-import com.zup.br.taxes_management.infra.TaxTypeNotFoundException;
+import com.zup.br.taxes_management.services.infra.TaxTypeNotFoundException;
 import com.zup.br.taxes_management.models.TaxType;
 import com.zup.br.taxes_management.repositories.TaxTypeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 @Service
 public class TaxCalculationServiceImpl implements TaxCalculationService {
 
     @Autowired
     TaxTypeRepository taxTypeRepository;
+
 
 
     @Override
@@ -23,8 +22,12 @@ public class TaxCalculationServiceImpl implements TaxCalculationService {
         return new TaxCalculationResponseDTO(taxType.getName(), baseValue, taxType.getAliquot(), taxValue);
     }
 
+
+    @Override
     public TaxType findTaxType(Long id) {
         return taxTypeRepository.findById(id)
                 .orElseThrow(() -> new TaxTypeNotFoundException("Tax type not found"));
     }
+
+
 }

@@ -1,6 +1,8 @@
 package com.zup.br.taxes_management.services.tax_type;
 
-import com.zup.br.taxes_management.infra.TaxTypeNotFoundException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.zup.br.taxes_management.controllers.dtos.TaxTypeRegisterDTO;
+import com.zup.br.taxes_management.services.infra.TaxTypeNotFoundException;
 import com.zup.br.taxes_management.models.TaxType;
 import com.zup.br.taxes_management.repositories.TaxTypeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,15 +16,21 @@ public class TaxTypeServiceImpl implements TaxTypeService {
     @Autowired
     private TaxTypeRepository taxTypeRepository;
 
+    ObjectMapper mapper = new ObjectMapper();
+
     @Override
-    public TaxType registerTaxType(TaxType taxType) {
-        return taxTypeRepository.save(taxType);
+    public TaxType registerTaxType (TaxTypeRegisterDTO taxTypeRegisterDTO) {
+        return taxTypeRepository.save(mapper.convertValue(taxTypeRegisterDTO, TaxType.class));
     }
+
+
 
     @Override
     public List<TaxType> displayAllTaxTypes() {
         return taxTypeRepository.findAll();
     }
+
+
 
     @Override
     public TaxType displayTaxTypeById (Long idTaxType) {
@@ -33,7 +41,10 @@ public class TaxTypeServiceImpl implements TaxTypeService {
         return taxTypeRepository.findById(idTaxType).get();
     }
 
-    public boolean deleteTaxTypeById(Long idTaxType) throws TaxTypeNotFoundException {
+
+
+    @Override
+    public boolean deleteTaxTypeById (Long idTaxType) throws TaxTypeNotFoundException {
         if (!taxTypeRepository.existsById(idTaxType)) {
             throw new TaxTypeNotFoundException("Tax type not found");
         }
@@ -41,4 +52,5 @@ public class TaxTypeServiceImpl implements TaxTypeService {
         taxTypeRepository.deleteById(idTaxType);
         return true;
     }
+
 }

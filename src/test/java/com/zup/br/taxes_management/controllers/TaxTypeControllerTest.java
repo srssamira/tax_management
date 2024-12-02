@@ -2,7 +2,7 @@ package com.zup.br.taxes_management.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zup.br.taxes_management.controllers.dtos.TaxTypeRegisterDTO;
-import com.zup.br.taxes_management.infra.TaxTypeNotFoundException;
+import com.zup.br.taxes_management.services.infra.TaxTypeNotFoundException;
 import com.zup.br.taxes_management.models.TaxType;
 import com.zup.br.taxes_management.services.tax_type.TaxTypeService;
 import org.hamcrest.CoreMatchers;
@@ -30,9 +30,12 @@ public class TaxTypeControllerTest {
 
     private ObjectMapper mapper;
     private TaxType taxType;
+    private TaxTypeRegisterDTO taxTypeRegisterDTO;
+
 
     @BeforeEach
     public void setUp() {
+
         mapper = new ObjectMapper();
 
         this.taxType = new TaxType();
@@ -40,20 +43,25 @@ public class TaxTypeControllerTest {
         taxType.setName("ICMS");
         taxType.setDescription("Tax on circulation of goods and services");
         taxType.setAliquot(18.0);
-    }
 
-    @Test
-    public void testWhenRegisterTaxTypeDoesntHaveImpediments() throws Exception {
-        TaxTypeRegisterDTO taxTypeRegisterDTO = new TaxTypeRegisterDTO();
+        this.taxTypeRegisterDTO = new TaxTypeRegisterDTO();
         taxTypeRegisterDTO.setName("IPI");
         taxTypeRegisterDTO.setDescription("Service tax");
         taxTypeRegisterDTO.setAliquot(12.0);
 
+    }
+
+
+
+    @Test
+    public void testWhenTheRegisterTaxTypeHasNoImpediment() throws Exception {
+
         String json = mapper.writeValueAsString(taxTypeRegisterDTO);
 
-        ObjectMapper objectMapper = new ObjectMapper();
+        Mockito.when(taxTypeService.registerTaxType(Mockito.any(TaxTypeRegisterDTO.class)))
+                .thenReturn(mapper.convertValue(taxTypeRegisterDTO, TaxType.class));
 
-        Mockito.when(taxTypeService.registerTaxType(Mockito.any(TaxType.class))).thenReturn(objectMapper.convertValue(taxTypeRegisterDTO, TaxType.class));
+        TaxType taxType2 = taxTypeService.registerTaxType(taxTypeRegisterDTO);
 
         mockMvc.perform(
                         MockMvcRequestBuilders
@@ -61,17 +69,17 @@ public class TaxTypeControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(json))
                 .andExpect(MockMvcResultMatchers.status().isCreated())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.id", CoreMatchers.is(taxType2.getId())))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.name", CoreMatchers.is("IPI")))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.description", CoreMatchers.is("Service tax")))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.aliquot", CoreMatchers.is(12.0)));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.aliquot", CoreMatchers.is(12.0))
+                );
     }
+
 
     @Test
     public void testWhenRegisterTaxTypeHasInvalidData() throws Exception {
-        TaxTypeRegisterDTO taxTypeRegisterDTO = new TaxTypeRegisterDTO();
         taxTypeRegisterDTO.setName(" ");
-        taxTypeRegisterDTO.setDescription("Service tax");
-        taxTypeRegisterDTO.setAliquot(12.0);
 
         String json = mapper.writeValueAsString(taxTypeRegisterDTO);
 
@@ -81,11 +89,11 @@ public class TaxTypeControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest())
-                .andExpect(MockMvcResultMatchers.jsonPath("$[?(@.field == 'name')].description").value("name can't be blank"));
+                .andExpect(MockMvcResultMatchers.jsonPath("$[?(@.field == 'name')].description")
+                        .value("name can't be blank")
+                );
 
-        taxTypeRegisterDTO.setName("IPI");
         taxTypeRegisterDTO.setDescription("");
-        taxTypeRegisterDTO.setAliquot(12.0);
 
         json = mapper.writeValueAsString(taxTypeRegisterDTO);
 
@@ -95,11 +103,10 @@ public class TaxTypeControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest())
-                .andExpect(MockMvcResultMatchers.jsonPath("$[?(@.field == 'description')].description").value("description can't be blank"));
-                                                            // procurando no meu map a chave description e verificando se ela retorna a mensagem de erro esperada
+                .andExpect(MockMvcResultMatchers.jsonPath("$[?(@.field == 'description')].description")
+                        .value("description can't be blank")
+                );
 
-        taxTypeRegisterDTO.setName("IPI");
-        taxTypeRegisterDTO.setDescription("Service tax");
         taxTypeRegisterDTO.setAliquot(null);
 
         json = mapper.writeValueAsString(taxTypeRegisterDTO);
@@ -110,8 +117,12 @@ public class TaxTypeControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest())
-                .andExpect(MockMvcResultMatchers.jsonPath("$[?(@.field == 'aliquot')].description").value("aliquot can't be null"));
+                .andExpect(MockMvcResultMatchers.jsonPath("$[?(@.field == 'aliquot')].description")
+                        .value("aliquot can't be null")
+                );
     }
+
+
 
     @Test
     public void testWhenReturnAllTaxTypes() throws Exception {
@@ -142,9 +153,12 @@ public class TaxTypeControllerTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$[1].id", CoreMatchers.is(2)))
                 .andExpect(MockMvcResultMatchers.jsonPath("$[1].name", CoreMatchers.is("IPI")))
                 .andExpect(MockMvcResultMatchers.jsonPath("$[1].description", CoreMatchers.is("Service tax")))
-                .andExpect(MockMvcResultMatchers.jsonPath("$[1].aliquot", CoreMatchers.is(12.0)));
+                .andExpect(MockMvcResultMatchers.jsonPath("$[1].aliquot", CoreMatchers.is(12.0))
+                );
 
     }
+
+
 
     @Test
     public void testWhenSpecificTaxTypeHasFoundById() throws Exception {
@@ -162,9 +176,11 @@ public class TaxTypeControllerTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.id", CoreMatchers.is(1)))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.name", CoreMatchers.is("ICMS")))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.description", CoreMatchers.is("Tax on circulation of goods and services")))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.aliquot", CoreMatchers.is(18.0)));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.aliquot", CoreMatchers.is(18.0))
+                );
 
     }
+
 
     @Test
     public void testWhenSpecificTaxTypeHasNotFoundById() throws Exception {
@@ -184,6 +200,8 @@ public class TaxTypeControllerTest {
 
     }
 
+
+
     @Test
     public void testWhenDeleteTaxTypeReturnsNoContent() throws Exception {
         mockMvc.perform(
@@ -192,6 +210,7 @@ public class TaxTypeControllerTest {
                 .andExpect(MockMvcResultMatchers.status().isNoContent())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.description", CoreMatchers.is("Tax type deleted successfully")));
     }
+
 
     @Test
     public void testWhenDeleteTaxTypeReturnsNotFound() throws Exception {
@@ -205,4 +224,6 @@ public class TaxTypeControllerTest {
                 .andExpect(MockMvcResultMatchers.status().isNotFound())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.description", CoreMatchers.is("Tax type not found")));
     }
+
+
 }

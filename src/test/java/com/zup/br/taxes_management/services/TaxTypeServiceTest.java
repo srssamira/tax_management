@@ -3,6 +3,8 @@ package com.zup.br.taxes_management.services;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.zup.br.taxes_management.controllers.dtos.TaxTypeRegisterDTO;
 import com.zup.br.taxes_management.models.TaxType;
 import com.zup.br.taxes_management.repositories.TaxTypeRepository;
 import com.zup.br.taxes_management.services.tax_type.TaxTypeService;
@@ -26,24 +28,44 @@ public class TaxTypeServiceTest {
     private TaxTypeRepository taxTypeRepository;
 
     private TaxType taxType;
+    private TaxType taxType2 = new TaxType();
+    private TaxTypeRegisterDTO taxTypeRegisterDTO;
+    ObjectMapper mapper;
+
 
     @BeforeEach
     public void setUp() {
+
+        this.mapper = new ObjectMapper();
+
         this.taxType = new TaxType();
+
         taxType.setId(1L);
         taxType.setName("ICMS");
         taxType.setDescription("Tax on circulation of goods and services");
         taxType.setAliquot(18.0);
+
+        taxType2.setName("IOF");
+        taxType2.setDescription("Tax on financial transactions");
+        taxType2.setAliquot(0.38);
+
+        this.taxTypeRegisterDTO = new TaxTypeRegisterDTO();
+        taxTypeRegisterDTO.setName("IOF");
+        taxTypeRegisterDTO.setDescription("Tax on financial transactions");
+        taxTypeRegisterDTO.setAliquot(0.38);
     }
+
+
 
     @Test
     public void testWhenRegisterTaxTypeHasNoImpediment() {
-        TaxType taxTypeRegistered = taxtypeService.registerTaxType(taxType);
 
-        Mockito.verify(taxTypeRepository, Mockito.times(1)).save(taxType);
+        TaxType taxTypeRegistered = taxtypeService.registerTaxType(taxTypeRegisterDTO);
+        Mockito.verify(taxTypeRepository, Mockito.times(1)).save(taxType2);
+
     }
 
-    // teste p retornar excecao na validacao eu faco no controller
+
 
     @Test
     public void testWhenDisplayListAllTaxTypes() {
@@ -64,6 +86,8 @@ public class TaxTypeServiceTest {
         Mockito.verify(taxTypeRepository, Mockito.times(1)).findAll();
     }
 
+
+
     @Test
     public void testWhenDisplayTaxTypeById() {
         Mockito.when(taxTypeRepository.findById(taxType.getId())).thenReturn(Optional.of(taxType));
@@ -75,6 +99,7 @@ public class TaxTypeServiceTest {
         assertEquals("ICMS", taxType.getName());
     }
 
+
     @Test
     public void testWhenDisplayTaxTypeByIdDoesNotExist() {
         Mockito.when(taxTypeRepository.findById(taxType.getId())).thenReturn(Optional.empty());
@@ -84,9 +109,6 @@ public class TaxTypeServiceTest {
         assertEquals("Tax type not found", expectedException.getMessage());
         Mockito.verify(taxTypeRepository, Mockito.times(1)).findById(taxType.getId());
     }
-
-    // teste do delete fazer no controller (pq retorna status http)
-
 
 
 }
