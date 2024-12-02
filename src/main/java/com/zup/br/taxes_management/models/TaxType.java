@@ -12,9 +12,9 @@ public class TaxType {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
-    String name;
-    String description;
-    Double aliquot;
+    private Long id;
+    private String name;
+    private String description;
+    private Double aliquot;
 
 }

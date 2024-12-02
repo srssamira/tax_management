@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface TaxTypeService {
 
-    List<TaxType> displayAllTaxTypes();
+        List<TaxType> displayAllTaxTypes();
 
     TaxType displayTaxTypeById(Long idTaxType);
 
